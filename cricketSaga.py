@@ -5,6 +5,7 @@ from pandas_ods_reader import read_ods
 from pyexcel_xlsx import get_data
 from pyexcel_xlsx import save_data
 import os
+var = 0
 fL = '.2f'
 uniDict = {'DJ' : 0,'DC' : 1,'HK' : 2,'MS' : 3}
 def modifyUniDict(data,archiveName,length):
