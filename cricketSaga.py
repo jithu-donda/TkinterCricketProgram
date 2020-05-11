@@ -5,6 +5,7 @@ from pandas_ods_reader import read_ods
 from pyexcel_xlsx import get_data
 from pyexcel_xlsx import save_data
 import os
+var = 0
 fL = '.2f'
 uniDict = {'DJ' : 0,'DC' : 1,'HK' : 2,'MS' : 3}
 def modifyUniDict(data,archiveName,length):
@@ -218,6 +219,32 @@ class Innings():
 		# 	# print(bowlStats[i])
 		# 	self.bowlerStats[currBowler][i].insert(INSERT,str(bowlStats[i]))
 
+	def getCurrentOverEntries(self):
+		copyOfEntries = self.listOfEntries[:]
+		balls = self.balls % 6
+		currEntries = " | "
+		lastEntry = copyOfEntries[-1]
+		if balls == 0 and lastEntry == 'e':
+			while lastEntry == 'e':
+				lastEntry = copyOfEntries.pop()
+				if lastEntry == 'e':
+					currEntries = " | " + str(lastEntry) + currEntries
+		else :
+			if balls == 0:
+				balls = 6
+			for i in range(balls):
+				lastEntry = 'e'
+				while lastEntry == 'e' and len(copyOfEntries) > 0:
+					lastEntry = copyOfEntries.pop()
+					currEntries = " | " + str(lastEntry) + currEntries
+			if len(copyOfEntries) > 0:
+				lastEntry = copyOfEntries[-1]
+				while lastEntry == 'e' and len(copyOfEntries) > 0:
+					lastEntry = copyOfEntries.pop()
+					if lastEntry == 'e':
+						currEntries = " | " + str(lastEntry) + currEntries
+		return currEntries
+	
 	def retScore(self):
 		return self.score
 
@@ -250,7 +277,7 @@ class Innings():
 
 	def addWide(self):
 		self.score += 1
-		self.listOfEntries.append('wd/nb')
+		self.listOfEntries.append('e')
 		currBalls = self.balls
 		overs = int(currBalls/6)
 		self.currBowler = (overs % 2)
@@ -263,7 +290,7 @@ class Innings():
 		lastEntry = self.listOfEntries.pop()
 		if (lastEntry == 'w'):
 			self.wickets -= 1
-		elif (lastEntry == 'wd/nb'):
+		elif (lastEntry == 'e'):
 			self.score -= 1
 			self.balls += 1
 		else :
@@ -273,7 +300,7 @@ class Innings():
 		if (lastEntry == 'w'):
 			self.batStats[int((self.wickets)/2)][self.currBatsman].redoScore(0)
 			self.bowlStats[self.currBowler].addWicket(-1)	
-		elif (lastEntry == 'wd/nb'):
+		elif (lastEntry == 'e'):
 			self.bowlStats[self.currBowler].addWide(-1)	
 		else :
 			self.batStats[int((self.wickets)/2)][self.currBatsman].redoScore(lastEntry)
@@ -450,6 +477,8 @@ class Match():
 
 		self.currInnStats = [StringVar(),StringVar()]
 		self.currInnVals = ["0/0 0.0","0.0"]
+		self.currOverStats = StringVar()
+		self.currOverStats.set("Curr Over : ")
 		# self.statsLbls = []
 		colvals = [6,9]
 		colSpanVals = [5,2]
@@ -465,6 +494,9 @@ class Match():
 		lblCol = [0,2]
 		lblTexts = ["Score","Overs"]
 		
+		lbl = Label(window, textvariable = self.currOverStats, bg = self.bg_colour, fg = 'gray1', font = 'Arial 20 bold')
+		lbl.grid(column = 5,row = val+2,columnspan = 5,pady = 5)
+
 		for inn in range(self.noOfInnings):
 			self.scoreText.append(Text(window,width = 5,height = 1))
 			self.oversText.append(Text(window,width = 5,height = 1))
@@ -592,7 +624,7 @@ class Match():
 		self.currInn = self.innings[self.currInn].modifyStats(self.currInn,self.overs,self.oversText,self.scoreText,self.batsmanStats,self.bowlerStats)
 		self.currInn = min(self.currInn,self.noOfInnings-1)
 		self.currInnStats[0].set(self.scoreText[oldInnVal].get('1.0','1.5') + " " + self.oversText[oldInnVal].get('1.0','1.4'))
-		
+		self.currOverStats.set("Curr Over : " + self.innings[self.currInn].getCurrentOverEntries())
 		# self.currInnStats[1].set(self.oversText[oldInnVal].get('1.0','1.4'))
 	def endMatch(self):
 		result = messagebox.askyesno("Cricket Saga","Are you sure you want to end the Innings?")
