@@ -5,7 +5,6 @@ from pandas_ods_reader import read_ods
 from pyexcel_xlsx import get_data
 from pyexcel_xlsx import save_data
 import os
-var = 0
 fL = '.2f'
 uniDict = {'DJ' : 0,'DC' : 1,'HK' : 2,'MS' : 3}
 def modifyUniDict(data,archiveName,length):
@@ -224,24 +223,24 @@ class Innings():
 		balls = self.balls % 6
 		currEntries = " | "
 		lastEntry = copyOfEntries[-1]
-		if balls == 0 and lastEntry == 'e':
-			while lastEntry == 'e':
+		if balls == 0 and lastEntry == 'wn':
+			while lastEntry == 'wn':
 				lastEntry = copyOfEntries.pop()
-				if lastEntry == 'e':
+				if lastEntry == 'wn':
 					currEntries = " | " + str(lastEntry) + currEntries
 		else :
 			if balls == 0:
 				balls = 6
 			for i in range(balls):
-				lastEntry = 'e'
-				while lastEntry == 'e' and len(copyOfEntries) > 0:
+				lastEntry = 'wn'
+				while lastEntry == 'wn' and len(copyOfEntries) > 0:
 					lastEntry = copyOfEntries.pop()
 					currEntries = " | " + str(lastEntry) + currEntries
 			if len(copyOfEntries) > 0:
 				lastEntry = copyOfEntries[-1]
-				while lastEntry == 'e' and len(copyOfEntries) > 0:
+				while lastEntry == 'wn' and len(copyOfEntries) > 0:
 					lastEntry = copyOfEntries.pop()
-					if lastEntry == 'e':
+					if lastEntry == 'wn':
 						currEntries = " | " + str(lastEntry) + currEntries
 		return currEntries
 	
@@ -277,7 +276,7 @@ class Innings():
 
 	def addWide(self):
 		self.score += 1
-		self.listOfEntries.append('e')
+		self.listOfEntries.append('wn')
 		currBalls = self.balls
 		overs = int(currBalls/6)
 		self.currBowler = (overs % 2)
@@ -290,7 +289,7 @@ class Innings():
 		lastEntry = self.listOfEntries.pop()
 		if (lastEntry == 'w'):
 			self.wickets -= 1
-		elif (lastEntry == 'e'):
+		elif (lastEntry == 'wn'):
 			self.score -= 1
 			self.balls += 1
 		else :
@@ -300,7 +299,7 @@ class Innings():
 		if (lastEntry == 'w'):
 			self.batStats[int((self.wickets)/2)][self.currBatsman].redoScore(0)
 			self.bowlStats[self.currBowler].addWicket(-1)	
-		elif (lastEntry == 'e'):
+		elif (lastEntry == 'wn'):
 			self.bowlStats[self.currBowler].addWide(-1)	
 		else :
 			self.batStats[int((self.wickets)/2)][self.currBatsman].redoScore(lastEntry)
@@ -478,7 +477,9 @@ class Match():
 		self.currInnStats = [StringVar(),StringVar()]
 		self.currInnVals = ["0/0 0.0","0.0"]
 		self.currOverStats = StringVar()
+		self.leadOrTrail = StringVar()
 		self.currOverStats.set("Curr Over : ")
+		self.leadOrTrail.set("")
 		# self.statsLbls = []
 		colvals = [6,9]
 		colSpanVals = [5,2]
@@ -495,7 +496,10 @@ class Match():
 		lblTexts = ["Score","Overs"]
 		
 		lbl = Label(window, textvariable = self.currOverStats, bg = self.bg_colour, fg = 'gray1', font = 'Arial 20 bold')
-		lbl.grid(column = 5,row = val+2,columnspan = 5,pady = 5)
+		lbl.grid(column = 6,row = val+2,columnspan = 5,pady = 5)
+
+		lbl = Label(window, textvariable = self.leadOrTrail, bg = self.bg_colour, fg = 'gray1', font = 'Arial 20 bold')
+		lbl.grid(column = 6,row = val*2+2,columnspan = 5,pady = 5)
 
 		for inn in range(self.noOfInnings):
 			self.scoreText.append(Text(window,width = 5,height = 1))
@@ -625,7 +629,15 @@ class Match():
 		self.currInn = min(self.currInn,self.noOfInnings-1)
 		self.currInnStats[0].set(self.scoreText[oldInnVal].get('1.0','1.5') + " " + self.oversText[oldInnVal].get('1.0','1.4'))
 		self.currOverStats.set("Curr Over : " + self.innings[self.currInn].getCurrentOverEntries())
-		# self.currInnStats[1].set(self.oversText[oldInnVal].get('1.0','1.4'))
+		# if (self.currInn == 1):
+		scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore()
+		if scoreDiff < 0:
+			self.leadOrTrail.set("Trail by " + str(abs(scoreDiff)))
+		elif scoreDiff == 0:
+			self.leadOrTrail.set("Scores level")
+		else :
+			self.leadOrTrail.set("Lead by " + str(scoreDiff))
+			# self.currInnStats[1].set(self.oversText[oldInnVal].get('1.0','1.4'))
 	def endMatch(self):
 		result = messagebox.askyesno("Cricket Saga","Are you sure you want to end the Innings?")
 		print(result)	
