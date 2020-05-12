@@ -161,25 +161,29 @@ class Innings():
 		self.currBowler = 0
 		self.batStats = [[IndStats(),IndStats()],[IndStats(),IndStats()]]
 		self.bowlStats = [IndStats(),IndStats()]
+		self.batsmanNames = []
+		self.bowlerNames = []
 	
+	def updatePlayerNames(self,listVal1,listVal2):
+		# print(listVal1)
+		# print(listVal2)
+		self.batsmanNames = listVal1
+		self.bowlerNames = listVal2
+
+	def getBatsmenNames(self):
+		return self.batsmanNames
+
+	def getBowlerNames(self):
+		return self.bowlerNames
+
 	def writeStats(self,data,namesDict,batsmanNames,bowlerNames):
-		# len2 = len(data['BowlArchives'][0])
-		# el = []
-		# for i in range(len2):
-		# 	el.append('')
-		# data['BowlArchives'].append(el)
-		# print(namesDict,end = "namesDict")
 		modifyUniDict(data,'BatArchives',3)
 		for i in range(4):
-			currName = batsmanNames[i].get()
-			# print(currName)
-			# print(uniDict[currName])
+			currName = self.batsmanNames[i%2]
 			data = self.batStats[int(i/2)][i%2].writeBatStats(data,namesDict[currName],uniDict[currName],i)
 		modifyUniDict(data,'BowlArchives',4)
 		for i in range(2):
-			currName = bowlerNames[i].get()
-			# print(currName)
-			# print(uniDict[currName])
+			currName = self.bowlerNames[i]
 			data = self.bowlStats[i].writeBowlStats(data,namesDict[currName],uniDict[currName])
 		for j in range(4):
 			i = j+1
@@ -188,19 +192,19 @@ class Innings():
 		return data
 	
 	def modifyStats(self,inngNo,maxOvers,oversText,scoreText,batStats,bowlStats):
-		oversText[inngNo].delete('1.0',END)
+		oversText.delete('1.0',END)
 		overs = str(int(self.balls/6))
 		balls = str(self.balls%6)
-		oversText[inngNo].insert(INSERT,overs + "." + balls)
-		scoreText[inngNo].delete('1.0',END)
-		scoreText[inngNo].insert(INSERT,str(self.score) + "/" + str(self.wickets))	
+		oversText.insert(INSERT,overs + "." + balls)
+		scoreText.delete('1.0',END)
+		scoreText.insert(INSERT,str(self.score) + "/" + str(self.wickets))	
 		# self.batsmanStats[wickets][0].delete(0,END)
 		# print(currBalls,end = "")
 		# print(currBowler)
 		for i in range(4):
-			self.batStats[int(i/2)][i%2].modifyBatStats(batStats[inngNo][i])
+			self.batStats[int(i/2)][i%2].modifyBatStats(batStats[i])
 		for i in range(2):
-			self.bowlStats[i].modifyBowlStats(bowlStats[inngNo][i])
+			self.bowlStats[i].modifyBowlStats(bowlStats[i])
 		# print(self.balls,end = " ")
 		# print(maxOvers*6)
 		# print(inngNo,end = " : ")
@@ -222,6 +226,8 @@ class Innings():
 		copyOfEntries = self.listOfEntries[:]
 		balls = self.balls % 6
 		currEntries = " | "
+		if len(copyOfEntries) == 0:
+			return ""
 		lastEntry = copyOfEntries[-1]
 		if balls == 0 and lastEntry == 'wn':
 			while lastEntry == 'wn':
@@ -339,7 +345,6 @@ class Match():
 		self.teams = []
 		self.overs = 10
 		self.window = Tk()
-		self.lead = 0
 		self.inningsCount = 0
 		self.possOvers = [4,6,8,10,12,14]
 		# myimage = PhotoImage(file = "cric1.gif")
@@ -409,14 +414,10 @@ class Match():
 		self.innings = []	
 		self.teams = [[],[]]
 		self.currInn = 0
+		self.inningsCount = 0
 		for i in range(self.noOfInnings):
-			self.batsmanNames.append([])
-			self.bowlerNames.append([])
-			self.batsmanStats.append([])
-			self.bowlerStats.append([])
 			self.innings.append(Innings())
 
-		# for inn in range(self.noOfInnings):
 		for i in range(4):
 			self.teams[i%2].append(self.playerNames[i].get())
 		
@@ -424,6 +425,7 @@ class Match():
 		self.overs = int(self.txt.get())
 		
 		if var:
+			self.lead = 0
 			title = ""
 			if self.selected.get() == 0:
 				print("T20")
@@ -434,29 +436,85 @@ class Match():
 			self.window1 = Toplevel()
 			self.window1.title(title)
 			self.window1.geometry('1350x1200')
-			self.runsButtons(17,self.window1)
+			self.runsButtons(10,self.window1)
 			self.window1.mainloop()
 			
 	
+	def showStatsFun(self,innVal):
+		print(innVal,end = "innVal\n")
+		val = self.reqRowVal
+		window = self.currentRunningWindow
+		lblCol = [0,2]
+		lblTexts = ["Score","Overs"]
+		
+		inn = innVal	
+		rowCol = val+2
+		
+		for i in range(2):
+			lbl = Label(window, text = lblTexts[i],bg = self.bg_colour,fg = self.fg_colour, font = ("Arial",self.subTitleSize))
+			lbl.grid(column = lblCol[i],row = rowCol,pady = 4)
+		
+		self.scoreText.grid(column = lblCol[0]+1,row = rowCol)
+		self.scoreText.delete('1.0',END)
+		self.scoreText.insert(INSERT,"0")
+		self.oversText.grid(column = lblCol[1]+1,row = rowCol)
+		self.oversText.delete('1.0',END)
+		self.oversText.insert(INSERT,"0.0")
+		
+		texts = ["Batsman","Runs","Balls","StrikeRate"]
+		for j in range(4):
+			lbl = Label(window, text = texts[j], bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
+			lbl.grid(column = j+1,row = val+5,padx = 3)
+		lbl = Label(window, text = "Innings"+str(inn+1),bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize),padx = 25)
+		lbl.grid(column = 0,row = val+6)
+		
+		texts = ["Bowler","Overs","Runs","wickets","Economy"]
+		for j in range(5):
+			lbl = Label(window, text = texts[j], bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
+			lbl.grid(column = j+6,row = val+5,padx = 2)
+			
+		batsmanNames = self.innings[inn].getBatsmenNames()
+		bowlerNames = self.innings[inn].getBowlerNames()
+		print(batsmanNames,end = "batsmanNames\n")
+		print(bowlerNames,end = "bowlerNames\n")
+		for i in range(4):
+			self.batsmanNames[i]['values'] = (batsmanNames[0],batsmanNames[1])
+			self.batsmanNames[i].current(i%2) #set the selected item
+			for j in range(3):
+				self.batsmanStats[i][j].delete(0,END)
+				self.batsmanStats[i][j].insert(INSERT,"0")
+				self.batsmanStats[i][j].configure({"background" : self.bg_colour})
+				self.batsmanStats[i][j].configure({"foreground" : self.fg_colour})
+		
+		for i in range(2):
+			self.bowlerNames[i]['values'] = (bowlerNames[0],bowlerNames[1])
+			self.bowlerNames[i].current(i%2) #set the selected item
+			for j in range(4):
+				self.bowlerStats[i][j].delete(0,END)
+				self.bowlerStats[i][j].configure({"foreground" : self.fg_colour})
+				self.bowlerStats[i][j].configure({"background" : self.bg_colour})
+				self.bowlerStats[i][j].insert(INSERT,"0")
+
 	def runsButtons(self,val,window):
-		# self.btns = []
-		# for i in [0,1,2,4]:
+		self.reqRowVal = val
+		self.currentRunningWindow = window
 		self.bg_colour = 'SlateGray2'
 		self.fg_colour = 'black'
 		window['bg'] = self.bg_colour		
+
 		lbl = Label(window, text = "Runs", bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
 		lbl.grid(column = 0,row = val)
-		# self.image0 = PhotoImage(file = "download.gif")
+
 		runsbgColour = ['ivory2','SkyBlue2','MistyRose2','plum2']
 		runsfgColour = ['black','black','black','black']
 		runsTexts = ["0","1","2","4"]
-		runsCommands = [lambda:self.runsFunction(0),lambda:self.runsFunction(1),lambda:self.runsFunction(2),lambda:self.runsFunction(4)]
+		runsCommands = [lambda:self.addScoreFunction(0),lambda:self.addScoreFunction(1),lambda:self.addScoreFunction(2),lambda:self.addScoreFunction(4)]
 		runsWidthVal = 7
 		runsHeightVal = 3
 		bottomTexts = ["Wicket","Undo","Wide","NoBall"]
 		bottombg = ['red','LemonChiffon3','DarkOrange1','DarkOrange1']
 		bottomfg = ['white','black','white','white']
-		bottomCommands = [lambda:self.runsFunction('Wicket'),lambda:self.runsFunction('IE'),lambda:self.runsFunction('Wide'),lambda:self.runsFunction('Wide')]
+		bottomCommands = [lambda:self.addScoreFunction('Wicket'),lambda:self.addScoreFunction('IE'),lambda:self.addScoreFunction('Wide'),lambda:self.addScoreFunction('Wide')]
 		bottomHeight = 3
 		
 		for i in range(4):
@@ -467,13 +525,64 @@ class Match():
 			btn = Button(window, text=bottomTexts[i], bg = bottombg[i],fg = bottomfg[i],font = 'Arial 15 bold',command=bottomCommands[i],height = bottomHeight,width = runsWidthVal)
 			btn.grid(column = i+1,row = val+1,pady = 5)
 
+		self.scoreText = Text(window,width = 5,height = 1)
+		self.oversText = Text(window,width = 5,height = 1)
 		self.currInnStats = [StringVar(),StringVar()]
 		self.currInnVals = ["0/0 0.0","0.0"]
 		self.currOverStats = StringVar()
 		self.leadOrTrail = StringVar()
 		self.currOverStats.set("Curr Over : ")
 		self.leadOrTrail.set("")
-		# self.statsLbls = []
+
+		inn = 0
+		for i in range(4):
+			combo = ttk.Combobox(window,width = 10)
+			combo['values']= (self.teams[inn][0],self.teams[inn][1])
+			combo.current(i%2) #set the selected item
+			combo.grid(column=1, row=val+i+6,pady = 2)
+			self.batsmanNames.append(combo)
+			tempList = []
+			for j in [2,3,4]:
+				txt = Entry(window,width=10)
+				txt.grid(column=j, row=val+i+6)
+				txt.insert(INSERT,"0")
+				txt.configure({"background" : self.bg_colour})
+				txt.configure({"foreground" : self.fg_colour})
+				tempList.append(txt)
+			self.batsmanStats.append(tempList)
+		
+		for i in range(2):
+			combo = ttk.Combobox(window,width =10)
+			combo['values']= (self.teams[1-inn][0],self.teams[1-inn][1])
+			combo.current(1 - i%2) #set the selected item
+			combo.grid(column=6, row=val+i+6,padx = 3,pady = 2)
+			self.bowlerNames.append(combo)
+			tempList = []
+			for j in [2,3,4,5]:
+				txt = Entry(window,width=10)
+				txt.grid(column=j+5, row=val+i+6,padx = 3)
+				txt.configure({"foreground" : self.fg_colour})
+				txt.configure({"background" : self.bg_colour})
+				txt.insert(INSERT,"0")
+				tempList.append(txt)
+			self.bowlerStats.append(tempList)
+
+		batsmenList = []
+		bowlerList = []
+		for i in range(2):
+			batCombo = self.batsmanNames[i]
+			bowlCombo = self.bowlerNames[i]
+			batsmenList.append(batCombo.get())
+			bowlerList.append(bowlCombo.get())
+		list1 = bowlerList[:]
+		list2 = batsmenList[:]
+		list1.reverse()
+		list2.reverse()
+		self.innings[0].updatePlayerNames(batsmenList,bowlerList)
+		self.innings[1].updatePlayerNames(list1,list2)
+		# self.showStatsFun(1)
+		self.showStatsFun(0)
+
 		colvals = [6,9]
 		colSpanVals = [5,2]
 		padyVals = [5,5]
@@ -482,78 +591,12 @@ class Match():
 			lbl = Label(window, textvariable = self.currInnStats[i], bg = self.bg_colour, fg = 'gray1', font = 'Arial 120 bold')
 			lbl.grid(column = colvals[i],row = val,rowspan = 3,columnspan = colSpanVals[i],pady = padyVals[i])
 		
-		# self.oversLbl = Label(window, textvariable = self.currInnOvers	, bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
-		# self.oversLbl.grid(column = 9,row = val,rowspan = 3,columnspan = 2)
-		
-		lblCol = [0,2]
-		lblTexts = ["Score","Overs"]
-		
-		lbl = Label(window, textvariable = self.currOverStats, bg = self.bg_colour, fg = 'gray1', font = 'Arial 20 bold')
+		lbl = Label(window, textvariable = self.currOverStats, bg = self.bg_colour, fg = 'gray1', font = 'Arial 20 bold',anchor = 'w')
 		lbl.grid(column = 6,row = val+2,columnspan = 5,pady = 5)
 
 		lbl = Label(window, textvariable = self.leadOrTrail, bg = self.bg_colour, fg = 'gray1', font = 'Arial 20 bold')
 		lbl.grid(column = 6,row = val*2+2,columnspan = 5,pady = 5)
 
-		for inn in range(self.noOfInnings):
-			self.scoreText.append(Text(window,width = 5,height = 1))
-			self.oversText.append(Text(window,width = 5,height = 1))
-			
-			rowCol = val*(inn+1)+2
-			
-			for i in range(2):
-				lbl = Label(window, text = lblTexts[i],bg = self.bg_colour,fg = self.fg_colour, font = ("Arial",self.subTitleSize))
-				lbl.grid(column = lblCol[i],row = rowCol,pady = 4)
-			
-			self.scoreText[inn].grid(column = lblCol[0]+1,row = rowCol)
-			self.scoreText[inn].insert(INSERT,"0")
-			self.oversText[inn].grid(column = lblCol[1]+1,row = rowCol)
-			self.oversText[inn].insert(INSERT,"0.0")
-			
-			texts = ["Batsman","Runs","Balls","StrikeRate"]
-			for j in range(4):
-				lbl = Label(window, text = texts[j], bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
-				lbl.grid(column = j+1,row = val*(inn+1)+5,padx = 3)
-			lbl = Label(window, text = "Innings"+str(inn+1),bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize),padx = 25)
-			lbl.grid(column = 0,row = val*(inn+1)+6)
-			
-			for i in range(4):
-				combo = ttk.Combobox(window,width = 10)
-				combo['values']= (self.teams[0][0],self.teams[0][1])
-				combo.current(i%2) #set the selected item
-				combo.grid(column=1, row=val*(inn+1)+i+6,pady = 2)
-				self.batsmanNames[inn].append(combo)
-				tempList = []
-				for j in [2,3,4]:
-					txt = Entry(window,width=10)
-					txt.grid(column=j, row=val*(inn+1)+i+6)
-					txt.insert(INSERT,"0")
-					txt.configure({"background" : self.bg_colour})
-					txt.configure({"foreground" : self.fg_colour})
-					tempList.append(txt)
-				self.batsmanStats[inn].append(tempList)
-			
-			texts = ["Bowler","Overs","Runs","wickets","Economy"]
-			for j in range(5):
-				lbl = Label(window, text = texts[j], bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
-				lbl.grid(column = j+6,row = val*(inn+1)+5,padx = 2)
-			for i in range(2):
-				combo = ttk.Combobox(window,width = 10)
-				combo['values']= (self.teams[1][0],self.teams[1][1])
-				combo.current(1 - i%2) #set the selected item
-				combo.grid(column=6, row=val*(inn+1)+i+6,padx = 3,pady = 2)
-				self.bowlerNames[inn].append(combo)
-				tempList = []
-				for j in [2,3,4,5]:
-					txt = Entry(window,width=10)
-					txt.grid(column=j+5, row=val*(inn+1)+i+6,padx = 3)
-					txt.configure({"foreground" : self.fg_colour})
-					txt.configure({"background" : self.bg_colour})
-					txt.insert(INSERT,"0")
-					tempList.append(txt)
-				self.bowlerStats[inn].append(tempList)
-
-			self.teams.reverse()
-		
 		texts = ["Confirm Order","End Match","End Day","Undo Changes","Close Window"]
 		colVals = [1,5,10,10,5]
 		rowVals = [val*(self.noOfInnings + 3),val*(self.noOfInnings + 3),val*(self.noOfInnings + 3),val*(self.noOfInnings + 3),val*(self.noOfInnings + 3)+1]
@@ -572,57 +615,30 @@ class Match():
 		# redoData.grid(column = 100,row = )
 
 	def setOrder(self):
-		for inn in range(2):
-			if self.batsmanNames[inn][0].get() == self.teams[0][1]:
-				# self.batsmanNames[inn]
-				for i in range(4):
-					self.batsmanNames[inn][i].current((i+1)%2) #set the selected item
-			else:
-				for i in range(4):
-					self.batsmanNames[inn][i].current(i%2) #set the selected item
-			if self.bowlerNames[inn][0].get() == self.teams[1][1]:
-				# self.teams[1].reverse()
-				for i in range(2):
-					self.bowlerNames[inn][i].current((i+1)%2) #set the selected item
-			else:
-				for i in range(2):
-					self.bowlerNames[inn][i].current(i%2) #set the selected item
-			self.teams.reverse()
-			
-	def runsFunction(self,val):
-		# print(val)
-		if val == 0:
-			self.innings[self.currInn].addScore(0)
-		elif val == 1:
-			self.innings[self.currInn].addScore(1)
-		elif val == 2:
-			self.innings[self.currInn].addScore(2)			
-		elif val == 4:
-			self.innings[self.currInn].addScore(4)
-		elif val == 'Wide':
-			self.innings[self.currInn].addWide()
-		elif val == 'IE':
-			# currInnVal = self.currInn
-			# print(currInnVal)
-			result = False
-			while not(result) and self.currInn >= 0:
-				result = self.innings[self.currInn].incorrectEntry()
-				if (not(result)):
-					self.currInn -= 1
-				#print(result)
-				#print(self.currInn)
-			# if (!result) 
-			if (self.currInn < 0):
-				self.currInn = 0
-		elif val == 'Wicket':
-			self.innings[self.currInn].addWicket()
-
+		batsmenList = self.innings[self.currInn].getBatsmenNames()
+		bowlerList = self.innings[self.currInn].getBowlerNames()
+		# for inn in range(2):
+		if self.batsmanNames[0].get() == batsmenList[1]:
+			batsmenList.reverse()
+			for i in range(4):
+				self.batsmanNames[i]['values'] = (batsmenList[0],batsmenList[1])
+				self.batsmanNames[i].current(i%2) #set the selected item
+		if self.bowlerNames[0].get() == bowlerList[1]:
+			# self.teams[1].reverse()
+			bowlerList.reverse()
+			for i in range(2):
+				self.bowlerNames[i]['values'] = (bowlerList[0],bowlerList[1])
+				self.bowlerNames[i].current(i%2) #set the selected item
+		
+		self.innings[self.currInn].updatePlayerNames(batsmenList,bowlerList)
+	
+	def displayModifiedStats(self):
+		# print(self.currInn,end = "self.currentInn\n")
 		oldInnVal = self.currInn
 		self.currInn = self.innings[self.currInn].modifyStats(self.currInn,self.overs,self.oversText,self.scoreText,self.batsmanStats,self.bowlerStats)
 		self.currInn = min(self.currInn,self.noOfInnings-1)
-		self.currInnStats[0].set(self.scoreText[oldInnVal].get('1.0','1.5') + " " + self.oversText[oldInnVal].get('1.0','1.4'))
-		self.currOverStats.set("Curr Over : " + self.innings[self.currInn].getCurrentOverEntries())
-		# if (self.currInn == 1):
+		self.currInnStats[0].set(self.scoreText.get('1.0','1.5') + " " + self.oversText.get('1.0','1.4'))
+		self.currOverStats.set("Curr Over : " + self.innings[oldInnVal].getCurrentOverEntries())
 		if self.currInn == 0:
 			scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore() + self.lead
 			if scoreDiff < 0:
@@ -641,55 +657,92 @@ class Match():
 				self.leadOrTrail.set("Scores level")
 			else:
 				self.leadOrTrail.set("Lead by " + str(scoreDiff))
-			# self.currInnStats[1].set(self.oversText[oldInnVal].get('1.0','1.4'))
 		else:
 			scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore() - self.lead
 			if self.innings[1].retWickets() == 4:
-				self.leadOrTrail.set("Team 1 won the match by " + str(abs(scoreDiff)-1) + " runs")
+				self.leadOrTrail.set(self.teams[0][0] + " and " + self.teams[0][1] + " won the match by " + str(abs(scoreDiff)-1) + " runs")
 				self.endMatch()				
 			if scoreDiff < 0:
 				self.leadOrTrail.set("Need " + str(abs(scoreDiff)) + " more runs to win")
 			elif scoreDiff == 0:
 				self.leadOrTrail.set("Scores level")
 			else:
-				self.leadOrTrail.set("Team 2 won the match by " + str(4 - self.innings[self.currInn].retWickets()) + " wickets")
+				self.leadOrTrail.set(self.teams[1][0] + " and " + self.teams[1][1] + " won the match by " + str(4 - self.innings[self.currInn].retWickets()) + " wickets")
 				self.endMatch()
-			
+
+		if self.currInn == 1:
+			if self.innings[1].retBalls() == 0:
+				self.showStatsFun(0)
+				self.innings[0].modifyStats(self.currInn,self.overs,self.oversText,self.scoreText,self.batsmanStats,self.bowlerStats)
+				self.currInnStats[0].set(self.scoreText.get('1.0','1.5') + " " + self.oversText.get('1.0','1.4'))
+				self.currOverStats.set("Curr Over : " + self.innings[0].getCurrentOverEntries())
+			elif self.innings[1].retBalls() == 1:
+				self.showStatsFun(1)
+				self.innings[1].modifyStats(self.currInn,self.overs,self.oversText,self.scoreText,self.batsmanStats,self.bowlerStats)
+
+	def addScoreFunction(self,val):
+		if val == 0:
+			self.innings[self.currInn].addScore(0)
+		elif val == 1:
+			self.innings[self.currInn].addScore(1)
+		elif val == 2:
+			self.innings[self.currInn].addScore(2)			
+		elif val == 4:
+			self.innings[self.currInn].addScore(4)
+		elif val == 'Wide':
+			self.innings[self.currInn].addWide()
+		elif val == 'IE':
+			result = False
+			while not(result) and self.currInn >= 0:
+				result = self.innings[self.currInn].incorrectEntry()
+				if (not(result)):
+					self.currInn -= 1
+			self.currInn = max(self.currInn,0)
+			self.showStatsFun(self.currInn)
+
+		elif val == 'Wicket':
+			self.innings[self.currInn].addWicket()
+
+		self.displayModifiedStats()
+				
+	def saveStats(self):
+		data = get_data(self.currFile)
+		save_data(self.oldFile,data)
+		namesDict = {}
+		for i in range(1,5):
+			namesDict[data['cricStats'][i][0]] = i
+		strings = ['BatArchives','BatArchives','BowlArchives']
+		for i in range(len(strings)):
+			len1 = len(data[strings[i]][0])
+			el = []
+			for j in range(len1):
+				el.append('')
+			data[strings[i]].append(el)
+		for i in range(self.noOfInnings):
+			data = self.innings[i].writeStats(data,namesDict,self.batsmanNames[i],self.bowlerNames[i])
+		save_data(self.currFile,data)
+		saveData = messagebox.showinfo("Stats Info","Stats saved succesfully!!!!")
+		self.lead = self.innings[0].retScore() - self.innings[1].retScore()
+		if self.selected.get() == 1 and self.inningsCount == 0:
+			self.window2 = Toplevel()
+			self.window2.title("Innings-2")
+			self.window2.geometry('1350x1200')
+			self.clickedStartMatch(False)
+			self.runsButtons(17,self.window2)
+			self.inningsCount += 1
+			self.window2.mainloop()
+		self.window2.destroy()
+		self.window1.destroy()
+
 	def endMatch(self):
 		result = messagebox.askyesno("Cricket Saga","Are you sure you want to end the Innings?")
-		# print(result)	
 		if (result):
-			data = get_data(self.currFile)
-			save_data(self.oldFile,data)
-			namesDict = {}
-			for i in range(1,5):
-				namesDict[data['cricStats'][i][0]] = i
-			strings = ['BatArchives','BatArchives','BowlArchives']
-			for i in range(len(strings)):
-				len1 = len(data[strings[i]][0])
-				el = []
-				for j in range(len1):
-					el.append('')
-				data[strings[i]].append(el)
-			for i in range(self.noOfInnings):
-				data = self.innings[i].writeStats(data,namesDict,self.batsmanNames[i],self.bowlerNames[i])
-			save_data(self.currFile,data)
-			saveData = messagebox.showinfo("Stats Info","Stats saved succesfully!!!!")
-			if (saveData):
-				self.lead = self.innings[0].retScore() - self.innings[1].retScore()
-				if self.selected.get() == 1 and self.inningsCount == 0:
-					self.window2 = Toplevel()
-					self.window2.title("Innings-2")
-					self.window2.geometry('1350x1200')
-					self.clickedStartMatch(False)
-					self.runsButtons(17,self.window2)
-					self.inningsCount += 1
-					self.window2.mainloop()
-				self.window2.destroy()
-				self.window1.destroy()
+			self.saveStats()
 	
 	def endDay(self):
-		self.endMatch()
+		result = messagebox.askyesno("Cricket Saga","Are you sure you want to end the Day?")
+		if (result):
+			self.saveStats()
 		os.system("start excel " + self.currFile)
 		self.window.destroy()
 	
