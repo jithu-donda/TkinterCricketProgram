@@ -350,8 +350,8 @@ class Match():
 		self.window.title("Cricket Saga")
 		self.window.geometry(str(width) + "x" + str(height))
 		# self.window.geometry('2000x2000')
-		self.bg_colour = 'plum1'
-		self.fg_colour = 'dark green'
+		self.bg_colour = 'cornsilk2'
+		self.fg_colour = 'OrangeRed2'
 		self.window['bg'] = self.bg_colour
 		self.currFile = file1
 		self.oldFile = file2
