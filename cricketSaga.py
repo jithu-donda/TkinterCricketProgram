@@ -11,7 +11,7 @@ def modifyUniDict(data,archiveName,length):
 	namesList = data[archiveName][0]
 	for i in range(4):
 		uniDict[namesList[i*length]] = i
-	print(uniDict)
+	# print(uniDict)
 class IndStats():
 	def __init__(self):
 		self.runs = 0
@@ -168,7 +168,7 @@ class Innings():
 		# for i in range(len2):
 		# 	el.append('')
 		# data['BowlArchives'].append(el)
-		print(namesDict,end = "namesDict")
+		# print(namesDict,end = "namesDict")
 		modifyUniDict(data,'BatArchives',3)
 		for i in range(4):
 			currName = batsmanNames[i].get()
@@ -178,8 +178,8 @@ class Innings():
 		modifyUniDict(data,'BowlArchives',4)
 		for i in range(2):
 			currName = bowlerNames[i].get()
-			print(currName)
-			print(uniDict[currName])
+			# print(currName)
+			# print(uniDict[currName])
 			data = self.bowlStats[i].writeBowlStats(data,namesDict[currName],uniDict[currName])
 		for j in range(4):
 			i = j+1
@@ -203,8 +203,8 @@ class Innings():
 			self.bowlStats[i].modifyBowlStats(bowlStats[inngNo][i])
 		# print(self.balls,end = " ")
 		# print(maxOvers*6)
-		print(inngNo,end = " : ")
-		print(self.listOfEntries)	
+		# print(inngNo,end = " : ")
+		# print(self.listOfEntries)	
 		if (self.wickets == 4 or self.balls == maxOvers*6):
 			return inngNo+1
 		else:
@@ -339,43 +339,26 @@ class Match():
 		self.teams = []
 		self.overs = 10
 		self.window = Tk()
+		self.lead = 0
+		self.inningsCount = 0
+		self.possOvers = [4,6,8,10,12,14]
 		# myimage = PhotoImage(file = "cric1.gif")
 		width = self.window.winfo_screenwidth()
 		height = self.window.winfo_screenheight()
-		print(width)
-		print(height)
+		# print(width)
+		# print(height)
 		self.window.title("Cricket Saga")
 		self.window.geometry(str(width) + "x" + str(height))
 		# self.window.geometry('2000x2000')
-		self.bg_colour = 'navy'
-		self.fg_colour = 'azure'
+		self.bg_colour = 'plum1'
+		self.fg_colour = 'dark green'
 		self.window['bg'] = self.bg_colour
 		self.currFile = file1
 		self.oldFile = file2
-		# self.window['image'] = img
-
-		#path = "cric1.gif"
-		#image = Image.open(path)
-		# image.show()
-		#print(image.size)
-		#print((width,height))
-		#new_image = image.resize((width,height))
-		#print(new_image.size)
-		#photo = ImageTk.PhotoImage(new_image)
-		# lbl = Label(self.window, fg = 'white',image = photo,text = "Sample",font = ("Arial",self.subTitleSize))
-		# lbl.grid(column = 0,row = 0)
-		# lbl.image = photo
-		# self.canvas = Canvas(self.window,width = 1350,height = 1200)
-		# self.canvas.grid(row = 0,column = 0)
-		# self.canvas.create_image(0,0,image=photo,anchor = 'nw')
+		
 		lbl = Label(self.window, text = "Welcome to", bg = self.bg_colour, fg = self.fg_colour, font = ('timesnewroman 30 bold'))
 		lbl.grid(column = 0,row = 0,padx = 75,pady = 100)
-		# lbl = Label(self.window, text = "to", bg = self.bg_colour, fg = self.fg_colour, font = ('Arial 30 bold'))
-		# lbl.grid(column = 1,row = 0,padx = 10,pady = 10)
-		# lbl = Label(self.window, text = "Cricket", bg = self.bg_colour, fg = self.fg_colour, font = ('Arial 30 bold'))
-		# lbl.grid(column = 2,row = 0,padx = 10,pady = 10)
-		# lbl = Label(self.window, text = "Saga", bg = self.bg_colour, fg = self.fg_colour, font = ('Arial 30 bold'))
-		# lbl.grid(column = 3,row = 0,padx = 10,pady = 10)
+		
 		self.playerNames = []
 		for i in range(4):
 			combo = ttk.Combobox(self.window,width = 15)
@@ -387,25 +370,26 @@ class Match():
 		for i in range(2):
 			lbl = Label(self.window, text = "Team" + str(1 + i%2), bg = self.bg_colour ,fg = self.fg_colour,font = ("Arial",self.subTitleSize))
 			lbl.grid(column = i+2,row = 1)
-			# self.labelList.append(lbl)
 
 		lbl = Label(self.window, text = "No of Overs", bg = self.bg_colour, fg = self.fg_colour, font = ("Arial",self.subTitleSize))
 		lbl.grid(column = 1,row = 4,)
-		self.txt = Entry(self.window,width=10)
-		self.txt.insert(0,"10")
+		
+		self.txt = ttk.Combobox(self.window,width = 10)
+		self.txt['values'] = self.possOvers
+		self.txt.current(4)
 		self.txt.grid(column=2, row=4,pady = 5)
 
 		self.selected = IntVar()
+		self.selected.set(1)
 		lbl = Label(self.window, text = "Mode of Match", bg = self.bg_colour, fg = self.fg_colour,font = ("Arial",self.subTitleSize))
 		lbl.grid(column = 1,row = 5) 
 		self.modes = ['T20','Test']
-		colors = ['red','white']
+		colors = ['black','black']
 		for i in range(2):
 			rad1 = Radiobutton(self.window,text=self.modes[i], fg=colors[i], bg = self.bg_colour,value=i, variable=self.selected)
 			rad1.grid(column=i+2, row=5,pady = 5)
-		# btn.grid(column=4, row=1)
 
-		startMatch = Button(self.window, text="Start Match", bg = 'DarkOrange1', fg = 'brown4', font = 'timesnewroman 14 bold italic', command=self.clickedStartMatch)
+		startMatch = Button(self.window, text="Start Match", bg = 'red', fg = 'white', font = 'timesnewroman 14 bold italic', command=self.clickedStartMatch)
 		startMatch.grid(column = 2,columnspan = 2,row = 6,pady = 7)
 
 		lbl = Label(self.window, text = "Cricket Saga!!!", bg = self.bg_colour, fg = self.fg_colour, font = 'timesnewroman 30 bold italic')
@@ -413,9 +397,9 @@ class Match():
 
 		self.window.mainloop()
 
-	def clickedStartMatch(self):
-		if (self.selected.get() == 1):
-			self.noOfInnings = 4
+	def clickedStartMatch(self,var = True):
+		# if (self.selected.get() == 1):
+		# 	self.noOfInnings = 4
 		self.scoreText = []
 		self.oversText = []
 		self.batsmanNames = []
@@ -439,11 +423,20 @@ class Match():
 		print(self.teams)
 		self.overs = int(self.txt.get())
 		
-		self.window1 = Toplevel()
-		self.window1.title("Match")
-		self.window1.geometry('1350x1200')
-		self.runsButtons(17,self.window1)
-		self.window1.mainloop()
+		if var:
+			title = ""
+			if self.selected.get() == 0:
+				print("T20")
+				title = "Match"
+			elif self.selected.get() == 1:
+				print("Test")
+				title = "Innings-1"
+			self.window1 = Toplevel()
+			self.window1.title(title)
+			self.window1.geometry('1350x1200')
+			self.runsButtons(17,self.window1)
+			self.window1.mainloop()
+			
 	
 	def runsButtons(self,val,window):
 		# self.btns = []
@@ -630,25 +623,44 @@ class Match():
 		self.currInnStats[0].set(self.scoreText[oldInnVal].get('1.0','1.5') + " " + self.oversText[oldInnVal].get('1.0','1.4'))
 		self.currOverStats.set("Curr Over : " + self.innings[self.currInn].getCurrentOverEntries())
 		# if (self.currInn == 1):
-		scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore()
-		if scoreDiff < 0:
-			self.leadOrTrail.set("Trail by " + str(abs(scoreDiff)))
-		elif scoreDiff == 0:
-			self.leadOrTrail.set("Scores level")
-		else :
-			self.leadOrTrail.set("Lead by " + str(scoreDiff))
+		if self.currInn == 0:
+			scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore() + self.lead
+			if scoreDiff < 0:
+				self.leadOrTrail.set("Trail by " + str(abs(scoreDiff)))
+			elif scoreDiff == 0:
+				self.leadOrTrail.set("Scores level")
+			else :
+				self.leadOrTrail.set("Lead by " + str(scoreDiff))	
+		elif self.currInn == 1 and self.inningsCount == 0:
+			if self.innings[1].retWickets() == 4:
+				self.endMatch()
+			scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore() - self.lead
+			if scoreDiff < 0:
+				self.leadOrTrail.set("Trail by " + str(abs(scoreDiff)))
+			elif scoreDiff == 0:
+				self.leadOrTrail.set("Scores level")
+			else:
+				self.leadOrTrail.set("Lead by " + str(scoreDiff))
 			# self.currInnStats[1].set(self.oversText[oldInnVal].get('1.0','1.4'))
+		else:
+			scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore() - self.lead
+			if self.innings[1].retWickets() == 4:
+				self.leadOrTrail.set("Team 1 won the match by " + str(abs(scoreDiff)-1) + " runs")
+				self.endMatch()				
+			if scoreDiff < 0:
+				self.leadOrTrail.set("Need " + str(abs(scoreDiff)) + " more runs to win")
+			elif scoreDiff == 0:
+				self.leadOrTrail.set("Scores level")
+			else:
+				self.leadOrTrail.set("Team 2 won the match by " + str(4 - self.innings[self.currInn].retWickets()) + " wickets")
+				self.endMatch()
+			
 	def endMatch(self):
 		result = messagebox.askyesno("Cricket Saga","Are you sure you want to end the Innings?")
-		print(result)	
+		# print(result)	
 		if (result):
-			# fileName = "cricStats.ods"
 			data = get_data(self.currFile)
 			save_data(self.oldFile,data)
-			# stats = data['cricStats']
-			# oldStats = stats
-			# save_data(fileName,data)
-			# print(data['oldCricStats'])
 			namesDict = {}
 			for i in range(1,5):
 				namesDict[data['cricStats'][i][0]] = i
@@ -661,27 +673,31 @@ class Match():
 				data[strings[i]].append(el)
 			for i in range(self.noOfInnings):
 				data = self.innings[i].writeStats(data,namesDict,self.batsmanNames[i],self.bowlerNames[i])
-				# self.teams.reverse
-			# print(stats)
-			# data['oldCricStats'] = data['cricStats']
-			# data['cricStats'] = stats
-			# data['oldCricStats'] = oldStats
-			# print(data['oldCricStats'])
 			save_data(self.currFile,data)
 			saveData = messagebox.showinfo("Stats Info","Stats saved succesfully!!!!")
-			print("Data saved succesfully")
-			print(saveData)
 			if (saveData):
+				self.lead = self.innings[0].retScore() - self.innings[1].retScore()
+				if self.selected.get() == 1 and self.inningsCount == 0:
+					self.window2 = Toplevel()
+					self.window2.title("Innings-2")
+					self.window2.geometry('1350x1200')
+					self.clickedStartMatch(False)
+					self.runsButtons(17,self.window2)
+					self.inningsCount += 1
+					self.window2.mainloop()
+				self.window2.destroy()
 				self.window1.destroy()
-			# self.window.destroy()
+	
 	def endDay(self):
 		self.endMatch()
 		os.system("start excel " + self.currFile)
 		self.window.destroy()
+	
 	def copyData(self):
 		save_data(self.currFile,get_data(self.oldFile))	
+	
 	def quitWindow(self):
 		self.window1.destroy()
 
-#print("Starting")
-match = Match("C:/Users/chait/Desktop/cricketFever/cricStats.xlsx","C:/Users/chait/Desktop/cricketFever/oldCricStats.xlsx")	
+# match = Match("C:/Users/chait/Desktop/cricketFever/cricStats.xlsx","C:/Users/chait/Desktop/cricketFever/oldCricStats.xlsx")	
+match = Match("cricStats.xlsx","oldCricStats.xlsx")	
