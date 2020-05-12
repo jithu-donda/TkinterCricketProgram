@@ -11,7 +11,6 @@ def modifyUniDict(data,archiveName,length):
 	namesList = data[archiveName][0]
 	for i in range(4):
 		uniDict[namesList[i*length]] = i
-	# print(uniDict)
 class IndStats():
 	def __init__(self):
 		self.runs = 0
@@ -71,18 +70,12 @@ class IndStats():
 		return self.wickets
 	
 	def modifyBatStats(self,txt):
-		# print(txt)
-		# format(self.strikeRate,'.2f')
-		# format(self.strikeRate,'.2f')
 		stats = [str(self.runs),str(self.balls),str(self.strikeRate)]
 		for i in range(3):
 			txt[i].delete(0,END)
 			txt[i].insert(INSERT,stats[i])
-			# txt[i].config(text = stats[i])
 
 	def modifyBowlStats(self,txt):
-		# format(self.economy,'.2f')
-		# format(self.strikeRate,'.2f')
 		overs = str(int(self.balls/6))
 		balls = str(int(self.balls % 6))
 		stats1 = overs + "." + balls
@@ -90,11 +83,9 @@ class IndStats():
 		for i in range(4):
 			txt[i].delete(0,END)
 			txt[i].insert(INSERT,stats[i])
-			# txt[i].config(text = stats[i])
 	def writeBatStats(self,stats,player,aCode,i):
 		stats['cricStats'][player][1] += self.runs
 		stats['cricStats'][player][2] += self.balls
-		# print(int(stats['cricStats'][player][2]))
 		if (int(stats['cricStats'][player][2]) != 0):
 			stats['cricStats'][player][3] = float(format(float(stats['cricStats'][player][1]*100.0)/stats['cricStats'][player][2],fL))
 		else:
@@ -103,9 +94,6 @@ class IndStats():
 		stats['cricStats'][player][8] = float(format(float(stats['cricStats'][player][1]) * (float(stats['cricStats'][player][3])/100),fL))
 		
 		lenVal = len(stats['BatArchives'])-(2-int(i/2))
-		# player -= 1
-		# print('playerVal',end = " ")
-		# print(player)
 		stats['BatArchives'][lenVal][aCode*3] = self.runs
 		stats['BatArchives'][lenVal][aCode*3 + 1] = self.balls
 		stats['BatArchives'][lenVal][aCode*3 + 2] = self.strikeRate
@@ -139,12 +127,7 @@ class IndStats():
 			stats['cricStats'][player][9] = float(format(float(stats['cricStats'][player][6]) * 6 * (float(self.getBalls(stats['cricStats'][player][4]))/stats['cricStats'][player][5]),fL))
 		else :
 			stats['cricStats'][player][9] = 4
-		# print(player,end = " ")
-		# print(stats['cricStats'][player][8],end = " ")	
-		# print(stats['cricStats'][player][9],end = " ")	
 		lenVal = len(stats['BowlArchives'])-1
-		# print(player)
-		# player -= 1
 		stats['BowlArchives'][lenVal][aCode*4] = str(int((self.balls)/6)) + "." + str((self.balls)%6)
 		stats['BowlArchives'][lenVal][aCode*4 + 1] = self.runs
 		stats['BowlArchives'][lenVal][aCode*4 + 2] = self.wickets
@@ -165,8 +148,6 @@ class Innings():
 		self.bowlerNames = []
 	
 	def updatePlayerNames(self,listVal1,listVal2):
-		# print(listVal1)
-		# print(listVal2)
 		self.batsmanNames = listVal1
 		self.bowlerNames = listVal2
 
@@ -198,29 +179,14 @@ class Innings():
 		oversText.insert(INSERT,overs + "." + balls)
 		scoreText.delete('1.0',END)
 		scoreText.insert(INSERT,str(self.score) + "/" + str(self.wickets))	
-		# self.batsmanStats[wickets][0].delete(0,END)
-		# print(currBalls,end = "")
-		# print(currBowler)
 		for i in range(4):
 			self.batStats[int(i/2)][i%2].modifyBatStats(batStats[i])
 		for i in range(2):
 			self.bowlStats[i].modifyBowlStats(bowlStats[i])
-		# print(self.balls,end = " ")
-		# print(maxOvers*6)
-		# print(inngNo,end = " : ")
-		# print(self.listOfEntries)	
 		if (self.wickets == 4 or self.balls == maxOvers*6):
 			return inngNo+1
 		else:
 			return inngNo
-		# for i in range(3):
-		# 	self.batsmanStats[wickets][i].delete(0,END)
-		# 	self.batsmanStats[wickets][i].insert(INSERT,str(batStats[i]))
-		
-		# for i in range(4):
-		# 	self.bowlerStats[currBowler][i].delete(0,END)
-		# 	# print(bowlStats[i])
-		# 	self.bowlerStats[currBowler][i].insert(INSERT,str(bowlStats[i]))
 
 	def getCurrentOverEntries(self):
 		copyOfEntries = self.listOfEntries[:]
@@ -272,9 +238,6 @@ class Innings():
 		overs = int(currBalls/6)
 		if (currBalls % 6 != 0):
 			self.currBowler = (overs % 2)
-		# print(self.currBowler,end = " ")
-		# print(currBalls,end = " ")
-		# print(self.score)
 		self.currBatsman = (self.wickets) % 2	
 		
 	def retCurrBowler(self):
@@ -289,7 +252,6 @@ class Innings():
 		self.bowlStats[self.currBowler].addWide(1)	
 
 	def incorrectEntry(self):
-		# print(self.listOfEntries)
 		if (len(self.listOfEntries) == 0):
 			return False
 		lastEntry = self.listOfEntries.pop()
@@ -310,8 +272,6 @@ class Innings():
 		else :
 			self.batStats[int((self.wickets)/2)][self.currBatsman].redoScore(lastEntry)
 			self.bowlStats[self.currBowler].redoScore(lastEntry)
-		# print(self.listOfEntries)
-		# print(self.balls[self.currInn])
 		return True
 	def addWicket(self):
 		if (self.wickets < 4):
@@ -324,8 +284,6 @@ class Innings():
 			self.updateCurrBatsmanAndBowler()
 			if (self.wickets == 4):
 				return "Innings Over"
-		# if (self.currInn == 2):
-		# 	return "Match Over"
 
 	def addScore(self,val):
 		self.score += val
@@ -347,14 +305,10 @@ class Match():
 		self.window = Tk()
 		self.inningsCount = 0
 		self.possOvers = [4,6,8,10,12,14]
-		# myimage = PhotoImage(file = "cric1.gif")
 		width = self.window.winfo_screenwidth()
 		height = self.window.winfo_screenheight()
-		# print(width)
-		# print(height)
 		self.window.title("Cricket Saga")
 		self.window.geometry(str(width) + "x" + str(height))
-		# self.window.geometry('2000x2000')
 		self.bg_colour = 'cornsilk2'
 		self.fg_colour = 'navy'
 		self.window['bg'] = self.bg_colour
@@ -403,8 +357,6 @@ class Match():
 		self.window.mainloop()
 
 	def clickedStartMatch(self,var = True):
-		# if (self.selected.get() == 1):
-		# 	self.noOfInnings = 4
 		self.scoreText = []
 		self.oversText = []
 		self.batsmanNames = []
@@ -430,6 +382,7 @@ class Match():
 			if self.selected.get() == 0:
 				print("T20")
 				title = "Match"
+				self.inningsCount = 1
 			elif self.selected.get() == 1:
 				print("Test")
 				title = "Innings-1"
@@ -580,7 +533,6 @@ class Match():
 		list2.reverse()
 		self.innings[0].updatePlayerNames(batsmenList,bowlerList)
 		self.innings[1].updatePlayerNames(list1,list2)
-		# self.showStatsFun(1)
 		self.showStatsFun(0)
 
 		colvals = [6,9]
@@ -608,12 +560,6 @@ class Match():
 			btn = Button(window, text=texts[i], command=commands[i], bg = bgs[i],fg = fgs[i],pady = 15,font = 'Arial 12 bold')
 			btn.grid(column = colVals[i],row = rowVals[i],pady = padyVals[i])
 
-		# endMatch = Button(window, text=, command=)
-		# endMatch.grid(column = 5,row = )
-	
-		# redoData = Button(window, text=, command=)
-		# redoData.grid(column = 100,row = )
-
 	def setOrder(self):
 		batsmenList = self.innings[self.currInn].getBatsmenNames()
 		bowlerList = self.innings[self.currInn].getBowlerNames()
@@ -624,7 +570,6 @@ class Match():
 				self.batsmanNames[i]['values'] = (batsmenList[0],batsmenList[1])
 				self.batsmanNames[i].current(i%2) #set the selected item
 		if self.bowlerNames[0].get() == bowlerList[1]:
-			# self.teams[1].reverse()
 			bowlerList.reverse()
 			for i in range(2):
 				self.bowlerNames[i]['values'] = (bowlerList[0],bowlerList[1])
@@ -633,7 +578,6 @@ class Match():
 		self.innings[self.currInn].updatePlayerNames(batsmenList,bowlerList)
 	
 	def displayModifiedStats(self):
-		# print(self.currInn,end = "self.currentInn\n")
 		oldInnVal = self.currInn
 		self.currInn = self.innings[self.currInn].modifyStats(self.currInn,self.overs,self.oversText,self.scoreText,self.batsmanStats,self.bowlerStats)
 		self.currInn = min(self.currInn,self.noOfInnings-1)
@@ -752,5 +696,5 @@ class Match():
 	def quitWindow(self):
 		self.window1.destroy()
 
-# match = Match("C:/Users/chait/Desktop/cricketFever/cricStats.xlsx","C:/Users/chait/Desktop/cricketFever/oldCricStats.xlsx")	
-match = Match("cricStats.xlsx","oldCricStats.xlsx")	
+match = Match("C:/Users/chait/Desktop/cricketFever/cricStats.xlsx","C:/Users/chait/Desktop/cricketFever/oldCricStats.xlsx")	
+# match = Match("cricStats.xlsx","oldCricStats.xlsx")	
