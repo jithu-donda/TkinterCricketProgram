@@ -351,7 +351,7 @@ class Match():
 		self.window.geometry(str(width) + "x" + str(height))
 		# self.window.geometry('2000x2000')
 		self.bg_colour = 'cornsilk2'
-		self.fg_colour = 'OrangeRed2'
+		self.fg_colour = 'navy'
 		self.window['bg'] = self.bg_colour
 		self.currFile = file1
 		self.oldFile = file2
@@ -389,7 +389,7 @@ class Match():
 			rad1 = Radiobutton(self.window,text=self.modes[i], fg=colors[i], bg = self.bg_colour,value=i, variable=self.selected)
 			rad1.grid(column=i+2, row=5,pady = 5)
 
-		startMatch = Button(self.window, text="Start Match", bg = 'red', fg = 'white', font = 'timesnewroman 14 bold italic', command=self.clickedStartMatch)
+		startMatch = Button(self.window, text="Start Match", bg = 'navy', fg = 'yellow', font = 'timesnewroman 14 bold italic', command=self.clickedStartMatch)
 		startMatch.grid(column = 2,columnspan = 2,row = 6,pady = 7)
 
 		lbl = Label(self.window, text = "Cricket Saga!!!", bg = self.bg_colour, fg = self.fg_colour, font = 'timesnewroman 30 bold italic')
