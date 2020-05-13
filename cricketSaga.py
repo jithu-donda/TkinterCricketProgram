@@ -605,14 +605,12 @@ class Match():
 			scoreDiff = self.innings[self.currInn].retScore() - self.innings[1-self.currInn].retScore() - self.lead
 			if self.innings[1].retWickets() == 4:
 				self.leadOrTrail.set(self.teams[0][0] + " and " + self.teams[0][1] + " won the match by " + str(abs(scoreDiff)-1) + " runs")
-				self.endMatch()				
+				# self.endMatch()				
 			if scoreDiff < 0:
-				self.leadOrTrail.set("Need " + str(abs(scoreDiff)) + " more runs to win")
-			elif scoreDiff == 0:
-				self.leadOrTrail.set("Scores level")
+				self.leadOrTrail.set("Need " + str(abs(scoreDiff)+1) + " more runs to win")
 			else:
 				self.leadOrTrail.set(self.teams[1][0] + " and " + self.teams[1][1] + " won the match by " + str(4 - self.innings[self.currInn].retWickets()) + " wickets")
-				self.endMatch()
+				# self.endMatch()
 
 		if self.currInn == 1:
 			if self.innings[1].retBalls() == 0:
